@@ -86,4 +86,9 @@ public class InventoryController {
         ManufacturerDto manufacturerDto = new ManufacturerDto(manufacturer.getName(), manufacturer.getHomePage(), manufacturer.getPhone());
         return new InventoryItemDto(inventoryItem.getId(), inventoryItem.getName(), inventoryItem.getReleaseDate(), manufacturerDto);
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public final ResponseEntity<Exception> handleAllExceptions(RuntimeException ex) {
+        return new ResponseEntity<>(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
