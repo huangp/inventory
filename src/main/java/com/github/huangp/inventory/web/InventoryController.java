@@ -9,6 +9,7 @@ import com.github.huangp.inventory.repository.ManufacturerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
@@ -33,6 +34,7 @@ public class InventoryController {
     }
 
     @PostMapping(path = "/inventory")
+    @Transactional
     ResponseEntity<InventoryItemDto> addInventory(@RequestBody @Valid InventoryItemDto body) {
         Optional<InventoryItem> inventoryItem = inventoryRepository.findByName(body.getName());
         if (inventoryItem.isPresent()) {
@@ -64,6 +66,7 @@ public class InventoryController {
     }
 
     @GetMapping(path = "/inventory/{id}")
+    @Transactional(readOnly = true)
     ResponseEntity<InventoryItemDto> getOne(@PathVariable String id) {
         Optional<InventoryItem> item = inventoryRepository.findById(id);
         if (item.isPresent()) {
@@ -74,6 +77,7 @@ public class InventoryController {
     }
 
     @GetMapping(path = "/inventory")
+    @Transactional(readOnly = true)
     ResponseEntity<List<InventoryItemDto>> getAll() {
         List<InventoryItemDto> result = StreamSupport.stream(inventoryRepository.findAll().spliterator(), false)
                 .map(InventoryController::inventoryItemEntityToDto)
