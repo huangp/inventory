@@ -6,7 +6,12 @@ import com.github.huangp.inventory.model.InventoryItem;
 import com.github.huangp.inventory.model.Manufacturer;
 import com.github.huangp.inventory.repository.InventoryRepository;
 import com.github.huangp.inventory.repository.ManufacturerRepository;
+import com.github.huangp.inventory.repository.OffsetPageable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,15 +20,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
 import javax.validation.Valid;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @RestController()
 public class InventoryController {
+    private static final Logger log = LoggerFactory.getLogger(InventoryController.class);
     private InventoryRepository inventoryRepository;
     private ManufacturerRepository manufacturerRepository;
 
@@ -78,8 +81,10 @@ public class InventoryController {
 
     @GetMapping(path = "/inventory")
     @Transactional(readOnly = true)
-    ResponseEntity<List<InventoryItemDto>> getAll() {
-        List<InventoryItemDto> result = StreamSupport.stream(inventoryRepository.findAll().spliterator(), false)
+    ResponseEntity<List<InventoryItemDto>> getAll(@RequestParam(value = "skip", defaultValue = "0") int skip,
+                                                  @RequestParam(value = "limit", defaultValue = "50") int limit) {
+        Pageable pager = new OffsetPageable(skip , limit);
+        List<InventoryItemDto> result = inventoryRepository.findAll(pager).stream()
                 .map(InventoryController::inventoryItemEntityToDto)
                 .collect(Collectors.toList());
 
@@ -93,7 +98,10 @@ public class InventoryController {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public final ResponseEntity<Exception> handleAllExceptions(RuntimeException ex) {
-        return new ResponseEntity<>(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    public final ResponseEntity<List<String>> handleAllExceptions(RuntimeException ex) {
+        log.error("error", ex);
+        List<String> entity = new ArrayList<>();
+        entity.add(ex.getMessage());
+        return new ResponseEntity<>(entity, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
