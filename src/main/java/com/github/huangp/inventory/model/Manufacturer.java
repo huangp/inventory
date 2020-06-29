@@ -1,11 +1,13 @@
 package com.github.huangp.inventory.model;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Access(AccessType.FIELD)
 public class Manufacturer {
     @Id
+    @NotBlank
     private String name;
 
     @Version

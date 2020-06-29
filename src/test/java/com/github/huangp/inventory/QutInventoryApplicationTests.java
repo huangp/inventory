@@ -62,6 +62,17 @@ class QutInventoryApplicationTests {
     }
 
 	@Test
+	public void testPostInvalidData() throws Exception {
+    	// empty name is invalid
+		HttpEntity<InventoryItemDto> entity = new HttpEntity<>(inventory(""), headers);
+
+		String url = "http://localhost:" + port + "/inventory";
+		ResponseEntity<InventoryItemDto> response = restTemplate.exchange(url, HttpMethod.POST, entity, InventoryItemDto.class);
+
+		Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+	}
+
+	@Test
 	public void testPostSameItemAgain() throws Exception {
 		HttpEntity<InventoryItemDto> entity = new HttpEntity<>(inventory("conflict item"), headers);
 

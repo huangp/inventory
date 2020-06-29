@@ -1,8 +1,7 @@
 package com.github.huangp.inventory.model;
 
-import com.github.huangp.inventory.dto.InventoryItemDto;
-
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 @Entity
@@ -15,6 +14,7 @@ public class InventoryItem {
     private Long version;
 
     @Column
+    @NotBlank
     private String name;
 
     @Column

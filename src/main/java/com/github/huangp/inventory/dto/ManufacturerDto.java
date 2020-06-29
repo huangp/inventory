@@ -1,6 +1,9 @@
 package com.github.huangp.inventory.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class ManufacturerDto {
+    @NotBlank
     private final String name;
     private final String homePage;
     private final String phone;

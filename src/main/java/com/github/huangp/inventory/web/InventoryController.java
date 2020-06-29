@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public class InventoryController {
     }
 
     @PostMapping(path = "/inventory")
-    ResponseEntity<InventoryItemDto> addInventory(@RequestBody InventoryItemDto body) {
+    ResponseEntity<InventoryItemDto> addInventory(@RequestBody @Valid InventoryItemDto body) {
         Optional<InventoryItem> inventoryItem = inventoryRepository.findByName(body.getName());
         if (inventoryItem.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

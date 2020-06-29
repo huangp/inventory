@@ -1,11 +1,15 @@
 package com.github.huangp.inventory.dto;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
 public class InventoryItemDto {
     private final String id;
+    @NotBlank
     private final String name;
     private final Date releaseDate;
+    @Valid
     private final ManufacturerDto manufacturer;
 
     public InventoryItemDto(String id, String name, Date releaseDate, ManufacturerDto manufacturer) {
