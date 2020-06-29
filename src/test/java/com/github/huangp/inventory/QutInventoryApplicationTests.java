@@ -8,6 +8,7 @@ import com.github.huangp.inventory.model.Manufacturer;
 import com.github.huangp.inventory.repository.InventoryRepository;
 import com.github.huangp.inventory.repository.ManufacturerRepository;
 import com.github.huangp.inventory.web.InventoryController;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,6 +31,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class QutInventoryApplicationTests {
+	private static String username = "user";
+	private static String password = "password";
 
     @LocalServerPort
     private int port;
@@ -49,6 +53,7 @@ class QutInventoryApplicationTests {
     public void setUp() {
         headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setBasicAuth(username, password, Charset.forName("UTF-8"));
     }
 
     @Test
@@ -97,7 +102,8 @@ class QutInventoryApplicationTests {
 		URI location = response.getHeaders().getLocation();
 		Assertions.assertThat(location).isNotNull();
 
-		ResponseEntity<InventoryItemDto> getResponse = restTemplate.exchange(location.toString(), HttpMethod.GET, null, ParameterizedTypeReference.forType(InventoryItemDto.class));
+		HttpEntity<Void> emptyEntity = new HttpEntity<>(null, headers);
+		ResponseEntity<InventoryItemDto> getResponse = restTemplate.exchange(location.toString(), HttpMethod.GET, emptyEntity, ParameterizedTypeReference.forType(InventoryItemDto.class));
 
 		Assertions.assertThat(getResponse.getBody().getId()).isNotBlank();
 		Assertions.assertThat(getResponse.getBody().getName()).isEqualTo("get item");
@@ -105,8 +111,9 @@ class QutInventoryApplicationTests {
 
 	@Test
 	public void testGetItemNotFound() throws Exception {
+		HttpEntity<Void> entity = new HttpEntity<>(null, headers);
 		String url = "http://localhost:" + port + "/inventory/not-exist-id";
-		ResponseEntity<InventoryItemDto> response = restTemplate.exchange(url, HttpMethod.GET, null, InventoryItemDto.class);
+		ResponseEntity<InventoryItemDto> response = restTemplate.exchange(url, HttpMethod.GET, entity, InventoryItemDto.class);
 
 		Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 	}
@@ -118,7 +125,8 @@ class QutInventoryApplicationTests {
 		String url = "http://localhost:" + port + "/inventory";
 		restTemplate.exchange(url, HttpMethod.POST, entity, InventoryItemDto.class);
 
-		ResponseEntity<List<InventoryItemDto>> response = restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<InventoryItemDto>>() {});
+		HttpEntity<Void> emptyEntity = new HttpEntity<>(null, headers);
+		ResponseEntity<List<InventoryItemDto>> response = restTemplate.exchange(url, HttpMethod.GET, emptyEntity, new ParameterizedTypeReference<List<InventoryItemDto>>() {});
 
 		Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 		Assertions.assertThat(response.getBody()).hasSizeGreaterThanOrEqualTo(1);
